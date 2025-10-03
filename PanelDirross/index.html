@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>REYES DEL VIRTUAL</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="container">
+    <!-- 🏆 Título principal -->
+    <header>
+      <h1>👑 REYES DEL VIRTUAL 👑</h1>
+      <div id="clock" class="clock">--:--</div>
+    </header>
+
+    <!-- ⚡ Zeus fijo -->
+    <div class="zeus">
+      <img src="img/zeus.png" alt="Zeus" class="zeus-img" />
+    </div>
+
+    <!-- 📈 Barra de progreso -->
+    <section class="progress-section">
+      <h2>Progreso Premio Sorpresa</h2>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress"></div>
+      </div>
+      <p class="progress-text">🔥 Cada jugada cuenta… sigue avanzando y desbloquea el premio sorpresa 🎁</p>
+    </section>
+
+    <!-- 🥇 Ranking -->
+    <section class="ranking-section">
+      <h2>🏆 Ranking Top 8 🏆</h2>
+      <table id="ranking-table">
+        <thead>
+          <tr>
+            <th>Puesto</th>
+            <th>Jugador</th>
+            <th>Puntos</th>
+            <th>Nivel</th>
+          </tr>
+        </thead>
+        <tbody id="ranking">
+          <tr><td colspan="4">Cargando...</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- 🪙 Premios -->
+    <section class="premios">
+      <div class="premio oro">🥇 Oro: <span id="premio-oro">--</span></div>
+      <div class="premio plata">🥈 Plata: <span id="premio-plata">--</span></div>
+      <div class="premio bronce">🥉 Bronce: <span id="premio-bronce">--</span></div>
+    </section>
+  </div>
+
+  <script>
+    const ENDPOINT = 'https://script.google.com/macros/s/AKfycbzPQIouocm5apjRdexY4n2k_9GIHPXwRWRD-57rCTK0IYAgiUxseCZTAw8D-BBdAhtnVQ/exec';
+
+    async function cargarDatos() {
+      try {
+        const res = await fetch(ENDPOINT);
+        const data = await res.json();
+
+        // 🕐 Hora
+        document.getElementById("clock").textContent = data.hora;
+
+        // 📈 Barra de progreso
+        const porcentaje = data.progreso?.porcentaje || 0;
+        document.getElementById("progress").style.width = porcentaje + "%";
+
+        // 🏆 Ranking
+        const tbody = document.getElementById("ranking");
+        tbody.innerHTML = "";
+        data.ranking.forEach((r, i) => {
+          if (r.nombre && r.puntos !== null) {
+            const tr = document.createElement("tr");
+            if (i === 0) tr.classList.add("top1");
+            if (i === 1) tr.classList.add("top2");
+            if (i === 2) tr.classList.add("top3");
+
+            tr.innerHTML = `
+              <td>${r.puesto}</td>
+              <td>${r.nombre}</td>
+              <td>${r.puntos.toFixed(2)}</td>
+              <td>${r.nivel || ''}</td>
+            `;
+            tbody.appendChild(tr);
+          }
+        });
+
+        // 🪙 Premios
+        document.getElementById("premio-oro").textContent = data.premios?.oro || "--";
+        document.getElementById("premio-plata").textContent = data.premios?.plata || "--";
+        document.getElementById("premio-bronce").textContent = data.premios?.bronce || "--";
+
+      } catch (err) {
+        console.error("Error al cargar datos:", err);
+      }
+    }
+
+    cargarDatos();
+    setInterval(cargarDatos, 60000); // cada 1 min
+  </script>
+</body>
+</html>
